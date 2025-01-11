@@ -1,0 +1,48 @@
+/* English Localizations */
+
+// CategorySelectionView
+"fortune_types" = "Fortune Types";
+"coffee_fortune" = "Coffee Fortune";
+"coffee_fortune_desc" = "Discover your future from Turkish coffee cup";
+"tarot" = "Tarot";
+"palm_reading" = "Palm Reading";
+"dice_fortune" = "Dice Fortune";
+"coming_soon" = "Coming Soon";
+"coffee_fortune_reading" = "Coffee Fortune Reading";
+"language_english" = "English";
+"language_turkish" = "Turkish";
+"coffee_cup" = "Coffee Cup Image";
+"coffee_plate" = "Coffee Plate Image";
+"select_cup_first" = "Please select coffee cup image first";
+"select_plate_next" = "Now select coffee plate image";
+"both_images_required" = "Both cup and plate images are required";
+"select_cup" = "Select Cup Photo";
+"select_plate" = "Select Plate Photo";
+"discover_your_future" = "Discover your mystical future with traditional fortune telling methods";
+"choose_preferred_language" = "Choose your preferred language";
+
+// ContentView
+"back" = "Back";
+"select_language" = "Select Language";
+"processing_fortune" = "Processing your fortune...";
+"select_cup_photo" = "Select cup photo";
+"select_photo" = "Select Photo";
+"read_fortune" = "Read Fortune";
+"stop" = "Stop";
+"listen_fortune" = "Listen to Fortune";
+
+
+
+
+"credits_remaining" = "Credits Remaining: %d";
+"buy_credits" = "Buy Credits";
+"credit_pack_title" = "Get More Credits";
+"not_enough_credits" = "Not Enough Credits";
+"purchase_credits" = "Purchase Credits";
+"credits_for" = "%d Credits for %@";
+"credit_pack_3" = "3 Credits Pack";
+
+"your_credits" = "Your Credits";
+"credits_remaining_desc" = "These credits can be used for fortune readings";
+"loading_products" = "Loading Products...";
+"select_language" = "Select Language";

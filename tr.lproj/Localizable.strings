@@ -1,0 +1,48 @@
+/* Turkish Localizations */
+
+// CategorySelectionView
+"fortune_types" = "Fal Çeşitleri";
+"coffee_fortune" = "Kahve Falı";
+"coffee_fortune_desc" = "Türk kahvesi fincanından geleceğinizi keşfedin";
+"tarot" = "Tarot";
+"palm_reading" = "El Falı";
+"dice_fortune" = "Zar Falı";
+"coming_soon" = "Yakında";
+"coffee_fortune_reading" = "Kahve Falı";
+"language_english" = "İngilizce";
+"language_turkish" = "Türkçe";
+"coffee_cup" = "Kahve Fincanı Fotoğrafı";
+"coffee_plate" = "Kahve Tabağı Fotoğrafı";
+"select_cup_first" = "Lütfen önce fincan fotoğrafını seçin";
+"select_plate_next" = "Şimdi tabak fotoğrafını seçin";
+"both_images_required" = "Fincan ve tabak fotoğrafları gerekli";
+"select_cup" = "Fincan Fotoğrafını Seç";
+"select_plate" = "Tabak Fotoğrafını Seç";
+"discover_your_future" = "Geleneksel fal yöntemleri ile gizemli geleceğinizi keşfedin";
+"choose_preferred_language" = "Tercih ettiğiniz dili seçin";
+
+// ContentView
+"back" = "Geri";
+"select_language" = "Dil Seçin";
+"processing_fortune" = "Falınıza bakılıyor...";
+"select_cup_photo" = "Fincan fotoğrafını seç";
+"select_photo" = "Fotoğraf Seç";
+"read_fortune" = "Falına Bak";
+"stop" = "Durdur";
+"listen_fortune" = "Falını Dinle";
+
+
+
+
+"credits_remaining" = "Kalan Kredi: %d";
+"buy_credits" = "Kredi Satın Al";
+"credit_pack_title" = "Daha Fazla Kredi Al";
+"not_enough_credits" = "Yetersiz Kredi";
+"purchase_credits" = "Kredi Satın Al";
+"credits_for" = "%d Kredi %@ karşılığında";
+"credit_pack_3" = "3 Credits Pack";
+
+"your_credits" = "Kredileriniz";
+"credits_remaining_desc" = "Bu krediler fal bakımı için kullanılabilir";
+"loading_products" = "Ürünler Yükleniyor...";
+"select_language" = "Dil Seçin";

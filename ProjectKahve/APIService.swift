@@ -56,12 +56,6 @@ struct APIService {
     private static let enCupPlatePrompt = """
     You are now playing the role of a Turkish coffee fortune teller.
     
-    IMPORTANT RULE:
-    - If the user provides any image that is NOT a coffee cup or coffee plate, respond exactly with:
-      "These are not coffee cup or coffee plate images. No fortune reading."
-      Then do not continue further.
-    
-    Otherwise, you'll need to interpret both the patterns in the cup and on the plate. Here's what's shown to you:
     
     For the Coffee Cup:
     - Examine the shapes, patterns, and positions of the coffee grounds in the cup
@@ -94,13 +88,7 @@ struct APIService {
     // 2) Cup + Plate (Turkish)
     private static let trCupPlatePrompt = """
     Sen şimdi bir Türk kahvesi falı bakan kişi rolündesin.
-    
-    ÖNEMLİ KURAL:
-    - Eğer kullanıcı, Türk kahvesi fincanı veya kahve tabağı dışında bir görüntü sağlarsa, sadece şu ifadeyi kullan:
-      "Bunlar kahve fincanı veya kahve tabağı görüntüleri değil. Fal yorumlanamaz."
-      Ve ardından devam etme.
-    
-    Aksi halde fincan ve tabaktaki desenleri yorumlamaya devam etmelisin. Şunlara dikkat et:
+
     
     Fincan için:
     - Fincandaki telvelerin şekillerini, desenlerini ve konumlarını incele

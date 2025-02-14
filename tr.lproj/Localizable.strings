@@ -70,3 +70,13 @@
 "interpret_dream" = "Rüyayı Yorumla";  // NEW
 "dream_placeholder" = "Lütfen rüyanızı detaylı bir şekilde anlatın...";  // NEW
 "processing_dream" = "Rüyanız yorumlanıyor...";  // NEW
+
+
+"dream_text_too_short" = "Lütfen en az %d karakter girin";
+"dream_text_too_long" = "Lütfen %d karakterden fazla girmeyin";
+"dream_api_error" = "Rüya yorumu oluşturulamadı. Lütfen tekrar deneyin.";
+"notice" = "Uyarı";
+"ok" = "Tamam";
+
+// Turkish
+"new_dream_interpretation" = "Yeni Rüya Yorumu";

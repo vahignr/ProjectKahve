@@ -67,3 +67,12 @@
 "interpret_dream" = "Interpret Dream";  // NEW
 "dream_placeholder" = "Please describe your dream in detail...";  // NEW
 "processing_dream" = "Interpreting your dream...";  // NEW
+
+"dream_text_too_short" = "Please enter at least %d characters";
+"dream_text_too_long" = "Please enter no more than %d characters";
+"dream_api_error" = "Failed to generate interpretation. Please try again.";
+"notice" = "Notice";
+"ok" = "OK";
+
+// English
+"new_dream_interpretation" = "New Dream Interpretation";

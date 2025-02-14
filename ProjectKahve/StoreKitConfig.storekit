@@ -25,7 +25,7 @@
           "locale" : "en_US"
         }
       ],
-      "productID" : "com.vahiguner.projectkahve.credits1",
+      "productID" : "com.vahiguner.projectkahve.credits1_new",
       "referenceName" : "1 Credit",
       "type" : "Consumable"
     },
@@ -40,7 +40,7 @@
           "locale" : "en_US"
         }
       ],
-      "productID" : "com.vahiguner.projectkahve.credits3",
+      "productID" : "com.vahiguner.projectkahve.credits3_new",
       "referenceName" : "3 Credits",
       "type" : "Consumable"
     },
@@ -55,7 +55,7 @@
           "locale" : "en_US"
         }
       ],
-      "productID" : "com.vahiguner.projectkahve.credits10",
+      "productID" : "com.vahiguner.projectkahve.credits10_new2",
       "referenceName" : "10 Credits",
       "type" : "Consumable"
     },
@@ -70,7 +70,7 @@
           "locale" : "en_US"
         }
       ],
-      "productID" : "com.vahiguner.projectkahve.credits50",
+      "productID" : "com.vahiguner.projectkahve.credits50_new",
       "referenceName" : "50 Credits",
       "type" : "Consumable"
     }

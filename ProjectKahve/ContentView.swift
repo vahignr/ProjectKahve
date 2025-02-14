@@ -76,12 +76,16 @@ struct ContentView: View {
                 appearOpacity = 1.0
             }
             
-            // Load previously saved coffee fortune text (if any)
-            if let savedText = UserDefaults.standard.string(forKey: "lastCoffeeFortuneText") {
+            // If there's a previously saved fortune text, load it
+            if let savedText = UserDefaults.standard.string(forKey: "lastCoffeeFortuneText"),
+               !savedText.isEmpty {
                 self.fortuneText = savedText
-                if !savedText.isEmpty {
-                    self.showFortuneText = true
-                }
+            }
+            
+            // If there's no cup image, hide any leftover fortune text
+            // so user sees "Select Cup Photo" button right away
+            if fortuneImages.cupImage == nil {
+                self.showFortuneText = false
             }
         }
         .onChange(of: isProcessing) { newValue in
@@ -96,6 +100,7 @@ struct ContentView: View {
                     state = value.translation
                 }
                 .onEnded { value in
+                    // Swipe right to dismiss
                     if value.translation.width > 100 {
                         dismiss()
                     }
@@ -160,7 +165,7 @@ struct ContentView: View {
                 Image(systemName: "cup.and.saucer.fill")
                     .font(.system(size: 44))
                     .foregroundColor(ModernTheme.sage)
-                    .symbolEffect(.bounce, options: .repeating, value: isProcessing)
+                    .symbolEffect(.bounce, value: isProcessing)
                 
                 Text("coffee_fortune_reading".localized)
                     .font(ModernTheme.Typography.title)
@@ -205,7 +210,8 @@ struct ContentView: View {
     
     // MARK: - Supporting Views
     private func ProcessingView(fortuneImages: FortuneImages) -> some View {
-        VStack {
+        VStack(spacing: 12) {
+            // 1) Top text: "Processing your fortune..."
             Text("processing_fortune".localized)
                 .font(ModernTheme.Typography.headline)
                 .foregroundColor(ModernTheme.textPrimary)
@@ -218,10 +224,28 @@ struct ContentView: View {
                     }
                 }
             
+            // 2) Image (the green effect)
             if let cupImage = fortuneImages.cupImage {
                 ImageProcessingView(image: cupImage)
                     .frame(width: 220, height: 220)
             }
+            
+            // 3) The “stay in the app” text
+            Text("stay_in_app_while_processing".localized)
+                .font(ModernTheme.Typography.body)
+                .foregroundColor(ModernTheme.textSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
+                .fixedSize(horizontal: false, vertical: true)
+            
+            // 4) Additional warning for irrelevant images
+            Text("irrelevant_image_warning".localized)
+                .font(ModernTheme.Typography.body)
+                .foregroundColor(ModernTheme.textSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
     
@@ -346,44 +370,72 @@ struct ContentView: View {
     // MARK: - Action Buttons View
     private func ActionButtonsView() -> some View {
         VStack(spacing: 16) {
-            if !fortuneImages.isComplete {
-                // Upload Buttons
-                VStack(spacing: 12) {
-                    if fortuneImages.cupImage == nil {
-                        ActionButton(
-                            title: "select_cup".localized,
-                            icon: "cup.and.saucer.fill",
-                            action: {
-                                isShowingCupPicker = true
-                                resetStates()
+            // Hide cup/plate selection & optional text if reading is in progress OR reading is done
+            if !isProcessing && !showFortuneText {
+                if fortuneImages.cupImage == nil {
+                    // No cup image yet
+                    ActionButton(
+                        title: "select_cup".localized,
+                        icon: "cup.and.saucer.fill",
+                        action: {
+                            isShowingCupPicker = true
+                            resetStates()
+                        }
+                    )
+                } else {
+                    // Cup photo exists
+                    if fortuneImages.plateImage == nil {
+                        // Plate photo is missing
+                        VStack(spacing: 12) {
+                            ActionButton(
+                                title: "select_plate".localized,
+                                icon: "circle.fill",
+                                action: {
+                                    isShowingPlatePicker = true
+                                    resetStates()
+                                }
+                            )
+                            
+                            // Only show "Read Fortune" if no TTS is available yet
+                            if audioManager.duration == 0 {
+                                ActionButton(
+                                    title: "read_fortune".localized,
+                                    icon: "sparkles",
+                                    action: {
+                                        withAnimation {
+                                            isProcessing = true
+                                            showFullImage = false
+                                        }
+                                        sendImageToAPI()
+                                    }
+                                )
                             }
-                        )
-                    }
-                    
-                    if fortuneImages.cupImage != nil && fortuneImages.plateImage == nil {
-                        ActionButton(
-                            title: "select_plate".localized,
-                            icon: "circle.fill",
-                            action: {
-                                isShowingPlatePicker = true
-                                resetStates()
-                            }
-                        )
+                            
+                            // Plate photo is optional
+                            Text("plate_photo_optional".localized)
+                                .font(ModernTheme.Typography.caption)
+                                .foregroundColor(ModernTheme.textSecondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 20)
+                        }
+                    } else {
+                        // Both cup & plate images exist
+                        // Only show "Read Fortune" if no TTS is available yet
+                        if audioManager.duration == 0 {
+                            ActionButton(
+                                title: "read_fortune".localized,
+                                icon: "sparkles",
+                                action: {
+                                    withAnimation {
+                                        isProcessing = true
+                                        showFullImage = false
+                                    }
+                                    sendImageToAPI()
+                                }
+                            )
+                        }
                     }
                 }
-            } else if !isProcessing && audioManager.duration == 0 {
-                // Read Fortune Button
-                ActionButton(
-                    title: "read_fortune".localized,
-                    icon: "sparkles",
-                    action: {
-                        withAnimation {
-                            isProcessing = true
-                            showFullImage = false
-                        }
-                        sendImageToAPI()
-                    }
-                )
             }
             
             // Audio Player Section
@@ -407,11 +459,13 @@ struct ContentView: View {
     
     // MARK: - API and Audio Methods
     private func sendImageToAPI() {
-        guard let cupImage = fortuneImages.cupImage,
-              let plateImage = fortuneImages.plateImage else {
+        guard let cupImage = fortuneImages.cupImage else {
             isProcessing = false
             return
         }
+        
+        // If plateImage is nil, we pass nil to the API so it uses the "cup-only" prompt
+        let plateImage = fortuneImages.plateImage
         
         guard creditsManager.useCredit() else {
             showPurchaseView = true
@@ -419,6 +473,7 @@ struct ContentView: View {
             return
         }
         
+        // Pass exactly the plateImage or nil
         APIService.sendImageToAPI(cupImage: cupImage, plateImage: plateImage) { content in
             DispatchQueue.main.async {
                 if let content = content {
@@ -500,7 +555,7 @@ struct ScaleButtonStyle: ButtonStyle {
     }
 }
 
-// Preview
+// MARK: - Preview
 #Preview {
     ContentView()
         .environmentObject(CreditsManager.shared)

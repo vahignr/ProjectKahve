@@ -46,3 +46,27 @@
 "credits_remaining_desc" = "Bu krediler fal bakımı için kullanılabilir";
 "loading_products" = "Ürünler Yükleniyor...";
 "select_language" = "Dil Seçin";
+
+"stay_in_app_while_processing" = "Lütfen fal bakılırken kredinizi kaybetmemek için uygulamadan çıkış yapmayın.";
+"irrelevant_image_warning" = "Alakasız bir resim seçerseniz, yapay zeka sizin için sanal bir kahve fincanı oluşturacak ve onu okuyacak.";
+
+
+// Turkish
+"cup_validation_failed" = "Bu bir kahve fincanı görüntüsü gibi görünmüyor. Lütfen bir Türk kahvesi fincanının net bir fotoğrafını yükleyin.";
+"plate_validation_failed" = "Bu bir kahve tabağı görüntüsü gibi görünmüyor. Lütfen bir Türk kahvesi tabağının net bir fotoğrafını yükleyin.";
+
+
+"plate_photo_optional" = "Kahve Tabağı Fotoğrafı isteğe bağlıdır";
+
+
+
+// CategorySelectionView
+"fortune_types" = "Fal Çeşitleri";
+"coffee_fortune" = "Kahve Falı";
+"coffee_fortune_desc" = "Türk kahvesi fincanından geleceğinizi keşfedin";
+"dream_interpreter" = "Rüya Yorumlayıcı";  // NEW
+"dream_interpreter_desc" = "Rüyanızın anlamını keşfedin";  // NEW
+"enter_dream" = "Rüyanızı yazın";  // NEW
+"interpret_dream" = "Rüyayı Yorumla";  // NEW
+"dream_placeholder" = "Lütfen rüyanızı detaylı bir şekilde anlatın...";  // NEW
+"processing_dream" = "Rüyanız yorumlanıyor...";  // NEW

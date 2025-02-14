@@ -33,19 +33,19 @@ struct PurchaseView: View {
                         }
                         .padding(.top, 40)
                         
-                        Text("credit_pack_title".localized)
+                        Text("Get More Credits")
                             .font(ModernTheme.Typography.title)
                             .foregroundColor(ModernTheme.textPrimary)
                             .multilineTextAlignment(.center)
                         
-                        Text(String(format: "credits_remaining".localized, creditsManager.remainingCredits))
+                        Text("Credits Remaining: \(creditsManager.remainingCredits)")
                             .font(ModernTheme.Typography.body)
                             .foregroundColor(ModernTheme.textSecondary)
                     }
                     
                     // Products Section
-                    if storeManager.products.isEmpty {
-                        LoadingView()
+                    if storeManager.isLoading {
+                        LoadingView(storeManager: storeManager)
                     } else {
                         ProductsGridView(storeManager: storeManager)
                     }
@@ -84,21 +84,6 @@ struct PurchaseView: View {
     }
 }
 
-// MARK: - Supporting Views
-struct LoadingView: View {
-    var body: some View {
-        VStack(spacing: 16) {
-            ProgressView()
-                .tint(ModernTheme.sage)
-            Text("loading_products".localized)
-                .font(ModernTheme.Typography.body)
-                .foregroundColor(ModernTheme.textSecondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 40)
-    }
-}
-
 struct ProductsGridView: View {
     @ObservedObject var storeManager: StoreManager
     @Environment(\.dismiss) private var dismiss
@@ -117,7 +102,6 @@ struct ProductsGridView: View {
                             dismiss()
                         } catch {
                             selectedProduct = nil
-                            // Handle error
                         }
                     }
                 }
@@ -133,23 +117,22 @@ struct PurchaseButton: View {
     
     private func getCreditsAmount() -> Int {
         switch product.id {
-        case "com.vahiguner.projectkahve.credits1": return 1
-        case "com.vahiguner.projectkahve.credits3": return 3
-        case "com.vahiguner.projectkahve.credits10": return 10
-        case "com.vahiguner.projectkahve.credits50": return 50
+        case "com.vahiguner.projectkahve.credits1_new": return 1
+        case "com.vahiguner.projectkahve.credits3_new": return 3
+        case "com.vahiguner.projectkahve.credits10_new2": return 10
+        case "com.vahiguner.projectkahve.credits50_new": return 50
         default: return 0
         }
     }
     
-    private var savings: String? {
+    private var savingsPercentage: Int? {
         let credits = getCreditsAmount()
         if credits > 1 {
-            let singleCreditPrice = 0.49
-            let totalWithoutDiscount = singleCreditPrice * Double(credits)
-            let productPrice = (product.price as NSDecimalNumber).doubleValue
-            let savings = totalWithoutDiscount - productPrice
-            if savings > 0.01 { // Only show if savings are significant
-                return String(format: "Save %.0f%%", (savings/totalWithoutDiscount) * 100)
+            switch credits {
+            case 3: return 33
+            case 10: return 59
+            case 50: return 63
+            default: return nil
             }
         }
         return nil
@@ -166,30 +149,21 @@ struct PurchaseButton: View {
     var body: some View {
         Button(action: action) {
             VStack(spacing: 16) {
-                // Tags Section
-                HStack {
-                    if isPopular {
-                        TagView(text: "MOST POPULAR", color: ModernTheme.sage)
-                    }
-                    if isBestValue {
-                        TagView(text: "BEST VALUE", color: ModernTheme.peach)
-                    }
-                    Spacer()
-                }
-                .padding(.bottom, isPopular || isBestValue ? 8 : 0)
-                
-                // Credits and Price
-                HStack(spacing: 12) {
+                // Credits Info and Tags
+                HStack(alignment: .top) {
+                    // Credits Info
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 8) {
                             Image(systemName: "sparkles")
                                 .font(.system(size: 16))
+                                .foregroundColor(ModernTheme.textPrimary)
                             Text("\(getCreditsAmount()) Credits")
                                 .font(ModernTheme.Typography.headline)
+                                .foregroundColor(ModernTheme.textPrimary)
                         }
                         
-                        if let savingsText = savings {
-                            Text(savingsText)
+                        if let savings = savingsPercentage {
+                            Text("Save \(savings)%")
                                 .font(ModernTheme.Typography.caption)
                                 .foregroundColor(ModernTheme.sage)
                         }
@@ -197,8 +171,22 @@ struct PurchaseButton: View {
                     
                     Spacer()
                     
+                    // Tags
+                    if isPopular {
+                        BadgeView(text: "MOST POPULAR", color: ModernTheme.sage)
+                    }
+                    
+                    if isBestValue {
+                        BadgeView(text: "BEST VALUE", color: ModernTheme.peach)
+                    }
+                }
+
+                // Price
+                HStack {
+                    Spacer()
                     Text(product.displayPrice)
                         .font(ModernTheme.Typography.body)
+                        .foregroundColor(ModernTheme.textPrimary)
                         .padding(.vertical, 8)
                         .padding(.horizontal, 20)
                         .background(
@@ -207,7 +195,6 @@ struct PurchaseButton: View {
                         )
                 }
             }
-            .frame(maxWidth: .infinity)
             .padding(.vertical, 24)
             .padding(.horizontal, 20)
             .background(
@@ -222,30 +209,68 @@ struct PurchaseButton: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
-                    .stroke(
-                        isSelected ? ModernTheme.sage : Color.clear,
-                        lineWidth: 2
-                    )
+                    .stroke(isSelected ? ModernTheme.sage : Color.clear, lineWidth: 2)
             )
-            .foregroundColor(ModernTheme.textPrimary)
         }
         .buttonStyle(ScaleButtonStyle())
     }
 }
 
-struct TagView: View {
+struct BadgeView: View {
     let text: String
     let color: Color
     
     var body: some View {
         Text(text)
-            .font(.caption)
-            .fontWeight(.medium)
+            .font(ModernTheme.Typography.caption)
             .foregroundColor(.white)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
             .background(color)
-            .cornerRadius(8)
+            .cornerRadius(16)
+    }
+}
+
+struct LoadingView: View {
+    @ObservedObject var storeManager: StoreManager
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            if let error = storeManager.loadingError {
+                VStack(spacing: 12) {
+                    Text("Failed to load products")
+                        .font(ModernTheme.Typography.body)
+                        .foregroundColor(ModernTheme.textSecondary)
+                    
+                    Text(error)
+                        .font(ModernTheme.Typography.caption)
+                        .foregroundColor(ModernTheme.textSecondary)
+                        .multilineTextAlignment(.center)
+                    
+                    Button(action: {
+                        storeManager.retryLoadingProducts()
+                    }) {
+                        Text("Retry")
+                            .font(ModernTheme.Typography.body)
+                            .foregroundColor(ModernTheme.sage)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(ModernTheme.sage.opacity(0.1))
+                            )
+                    }
+                }
+            } else {
+                ProgressView()
+                    .tint(ModernTheme.sage)
+                Text("Loading Products...")
+                    .font(ModernTheme.Typography.body)
+                    .foregroundColor(ModernTheme.textSecondary)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 40)
     }
 }
 

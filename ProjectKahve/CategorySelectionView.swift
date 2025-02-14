@@ -19,10 +19,10 @@ struct FortuneCategory: Identifiable {
                 gradientColors: [ModernTheme.sage, ModernTheme.mint]
             ),
             FortuneCategory(
-                title: "palm_reading".localized,
-                icon: "hand.raised.fill",
-                description: "coming_soon".localized,
-                isAvailable: false,
+                title: "dream_interpreter".localized,
+                icon: "moon.stars.fill",
+                description: "dream_interpreter_desc".localized,
+                isAvailable: true,
                 gradientColors: [ModernTheme.lavender, ModernTheme.sage]
             )
         ]
@@ -33,6 +33,7 @@ struct FortuneCategory: Identifiable {
 struct CategorySelectionView: View {
     @StateObject private var localizationManager = LocalizationManager.shared
     @State private var showKahveFali = false
+    @State private var showDreamInterpreter = false
     @State private var isLoading = true
     @State private var showLanguageSelection = false
     @State private var selectedCategory: FortuneCategory?
@@ -69,7 +70,11 @@ struct CategorySelectionView: View {
                                 }
                                 if category.isAvailable {
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                        showKahveFali = true
+                                        if category.title == "dream_interpreter".localized {
+                                            showDreamInterpreter = true
+                                        } else {
+                                            showKahveFali = true
+                                        }
                                     }
                                 }
                             }
@@ -94,6 +99,9 @@ struct CategorySelectionView: View {
         }
         .fullScreenCover(isPresented: $showKahveFali) {
             ContentView()
+        }
+        .fullScreenCover(isPresented: $showDreamInterpreter) {
+            DreamInterpreterView()
         }
         .overlay {
             if isLoading {

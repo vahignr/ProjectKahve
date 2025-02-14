@@ -4,6 +4,7 @@ import SwiftUI
 class LocalizationManager: ObservableObject {
     @Published var currentLanguage: String {
         didSet {
+            UserDefaults.standard.set(currentLanguage, forKey: "APILanguage")
             UserDefaults.standard.set([currentLanguage], forKey: "AppleLanguages")
             UserDefaults.standard.synchronize()
             Bundle.setLanguage(currentLanguage)
@@ -12,42 +13,54 @@ class LocalizationManager: ObservableObject {
     
     static let shared = LocalizationManager()
     
-    init() {
-        if let languageArray = UserDefaults.standard.array(forKey: "AppleLanguages") as? [String],
-           let currentLanguage = languageArray.first {
-            self.currentLanguage = currentLanguage
+    private init() {
+        // First, try to get the stored API language
+        if let storedLanguage = UserDefaults.standard.string(forKey: "APILanguage") {
+            self.currentLanguage = storedLanguage
         } else {
-            self.currentLanguage = "tr" // Default to Turkish
+            // If no stored language, set based on device region
+            let deviceRegion = Locale.current.regionCode ?? "US"
+            self.currentLanguage = deviceRegion == "TR" ? "tr" : "en"
+            
+            // Store the initial language
+            UserDefaults.standard.set(self.currentLanguage, forKey: "APILanguage")
+            UserDefaults.standard.set([self.currentLanguage], forKey: "AppleLanguages")
+            UserDefaults.standard.synchronize()
         }
+        
+        // Initialize the bundle
+        Bundle.setLanguage(self.currentLanguage)
     }
     
     func setLanguage(_ languageCode: String) {
         currentLanguage = languageCode
         NotificationCenter.default.post(name: Notification.Name("LanguageChanged"), object: nil)
     }
+    
+    func getCurrentAPILanguage() -> String {
+        return currentLanguage
+    }
 }
 
-// Extension for dynamic language switching
+// MARK: - Bundle Extension
 extension Bundle {
     private static var bundle: Bundle?
     
     static func setLanguage(_ language: String) {
         Bundle.bundle = nil
-        
-        let path = Bundle.main.path(forResource: language, ofType: "lproj")
-        if let bundle = path.map(Bundle.init(path:)) ?? nil {
-            Self.bundle = bundle
+        if let path = Bundle.main.path(forResource: language, ofType: "lproj"),
+           let bundle = Bundle(path: path) {
+            Bundle.bundle = bundle
         }
     }
     
     static func localizedBundle() -> Bundle {
-        return Self.bundle ?? Bundle.main
+        return Bundle.bundle ?? Bundle.main
     }
 }
 
-// Extension for localized string
 extension String {
     var localized: String {
-        return NSLocalizedString(self, tableName: nil, bundle: Bundle.localizedBundle(), value: "", comment: "")
+        NSLocalizedString(self, bundle: Bundle.localizedBundle(), comment: "")
     }
 }

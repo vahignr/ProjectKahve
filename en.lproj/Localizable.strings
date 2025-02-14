@@ -31,9 +31,6 @@
 "stop" = "Stop";
 "listen_fortune" = "Listen to Fortune";
 
-
-
-
 "credits_remaining" = "Credits Remaining: %d";
 "buy_credits" = "Buy Credits";
 "credit_pack_title" = "Get More Credits";
@@ -46,3 +43,27 @@
 "credits_remaining_desc" = "These credits can be used for fortune readings";
 "loading_products" = "Loading Products...";
 "select_language" = "Select Language";
+
+"stay_in_app_while_processing" = "Please stay in the app while your fortune is being processed so you don’t lose your credit.";
+"irrelevant_image_warning" = "If you pick irrelevant picture, AI will generate a virtual coffee cup for you and read that.";
+
+// English
+"cup_validation_failed" = "This doesn't appear to be a coffee cup image. Please upload a clear photo of a Turkish coffee cup.";
+"plate_validation_failed" = "This doesn't appear to be a coffee plate image. Please upload a clear photo of a Turkish coffee plate.";
+
+
+
+"plate_photo_optional" = "Coffee Plate Picture is optional";
+
+
+
+// CategorySelectionView
+"fortune_types" = "Fortune Types";
+"coffee_fortune" = "Coffee Fortune";
+"coffee_fortune_desc" = "Discover your future from Turkish coffee cup";
+"dream_interpreter" = "Dream Interpreter";  // NEW
+"dream_interpreter_desc" = "Discover the meaning of your dream";  // NEW
+"enter_dream" = "Enter Your Dream";  // NEW
+"interpret_dream" = "Interpret Dream";  // NEW
+"dream_placeholder" = "Please describe your dream in detail...";  // NEW
+"processing_dream" = "Interpreting your dream...";  // NEW

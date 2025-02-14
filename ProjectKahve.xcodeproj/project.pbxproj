@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3769D5AD2D308AB100168B9A /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3769D5AC2D308AB100168B9A /* StoreKit.framework */; };
+		3701C9632D38619500551B16 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3701C9622D38619500551B16 /* StoreKit.framework */; };
 		376B722B2CE138EF008545EB /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 376B722A2CE138EF008545EB /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3701C9622D38619500551B16 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		373C31212CE13C2B00DB8D55 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
-		3769D5AC2D308AB100168B9A /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		376B72292CE138EF008545EB /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		376FC83A2CCD6640009E4CDF /* ProjectKahve.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ProjectKahve.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -44,7 +44,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3769D5AD2D308AB100168B9A /* StoreKit.framework in Frameworks */,
+				3701C9632D38619500551B16 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -54,7 +54,7 @@
 		3739F4452CF6332D008D010B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				3769D5AC2D308AB100168B9A /* StoreKit.framework */,
+				3701C9622D38619500551B16 /* StoreKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -316,7 +316,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = deneme.ProjectKahve;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vahiguner.projectkahve;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -351,7 +351,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = deneme.ProjectKahve;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vahiguner.projectkahve;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;

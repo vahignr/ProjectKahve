@@ -13,7 +13,7 @@ struct FortuneTextDisplay: View {
         if let index = sentenceStartTimes.firstIndex(where: { $0 > currentTime }) {
             return max(0, index - 1)
         } else {
-            return sentences.count - 1
+            return max(0, sentences.count - 1)
         }
     }
 
@@ -43,14 +43,12 @@ struct FortuneTextDisplay: View {
         ScrollViewReader { proxy in
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 16) {
-                    Color.clear.frame(height: 60)
-
                     ForEach(Array(sentences.enumerated()), id: \.offset) { index, sentence in
                         Text(sentence)
                             .font(.body)
                             .foregroundColor(index == currentSentenceIndex ?
-                                Color.black : // Highlighted text color
-                                Color.black.opacity(0.9)) // Non-highlighted text color
+                                Color.black :
+                                Color.black.opacity(0.6))
                             .padding(.horizontal, 20)
                             .padding(.vertical, 8)
                             .background(
@@ -62,18 +60,17 @@ struct FortuneTextDisplay: View {
                             )
                             .id(index)
                     }
-
-                    Color.clear.frame(height: 60)
                 }
                 .padding(.vertical, 20)
                 .onAppear {
                     prepareTextData()
+                    proxy.scrollTo(0, anchor: .top)
                 }
                 .onChange(of: currentTime) { _ in
                     let newIndex = currentSentenceIndex
                     if newIndex != previousSentenceIndex {
                         previousSentenceIndex = newIndex
-                        withAnimation(.easeInOut(duration: 0.1)) {
+                        withAnimation(.easeInOut(duration: 0.3)) {
                             proxy.scrollTo(newIndex, anchor: .center)
                         }
                     }

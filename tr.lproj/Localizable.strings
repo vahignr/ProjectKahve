@@ -3,7 +3,7 @@
 // CategorySelectionView
 "fortune_types" = "Fal Çeşitleri";
 "coffee_fortune" = "Kahve Falı";
-"coffee_fortune_desc" = "Türk kahvesi fincanından geleceğinizi keşfedin";
+"coffee_fortune_desc" = "Türk kahvesinden falınıza baktırın";
 "tarot" = "Tarot";
 "palm_reading" = "El Falı";
 "dice_fortune" = "Zar Falı";
@@ -18,7 +18,7 @@
 "both_images_required" = "Fincan ve tabak fotoğrafları gerekli";
 "select_cup" = "Fincan Fotoğrafını Seç";
 "select_plate" = "Tabak Fotoğrafını Seç";
-"discover_your_future" = "Geleneksel fal yöntemleri ile gizemli geleceğinizi keşfedin";
+"discover_your_future" = "Geleneksel fal çeşitleriyle geleceğinizi öğrenin";
 "choose_preferred_language" = "Tercih ettiğiniz dili seçin";
 
 // ContentView
@@ -52,8 +52,8 @@
 
 
 // Turkish
-"cup_validation_failed" = "Bu bir kahve fincanı görüntüsü gibi görünmüyor. Lütfen bir Türk kahvesi fincanının net bir fotoğrafını yükleyin.";
-"plate_validation_failed" = "Bu bir kahve tabağı görüntüsü gibi görünmüyor. Lütfen bir Türk kahvesi tabağının net bir fotoğrafını yükleyin.";
+"cup_validation_failed" = "Bu bir kahve fincanı görüntüsü gibi görünmüyor. Lütfen içilmiş bir Türk kahvesi fincanının içinin net bir fotoğrafını yükleyin.";
+"plate_validation_failed" = "Bu bir kahve tabağı görüntüsü gibi görünmüyor. Lütfen bir Türk kahvesi tabağının net bir fotoğrafını yükleyin (fincanı kapattıktan sonra).";
 
 
 "plate_photo_optional" = "Kahve Tabağı Fotoğrafı isteğe bağlıdır";
@@ -63,7 +63,7 @@
 // CategorySelectionView
 "fortune_types" = "Fal Çeşitleri";
 "coffee_fortune" = "Kahve Falı";
-"coffee_fortune_desc" = "Türk kahvesi fincanından geleceğinizi keşfedin";
+"coffee_fortune_desc" = "Kahve falınıza baktırın";
 "dream_interpreter" = "Rüya Yorumlayıcı";  // NEW
 "dream_interpreter_desc" = "Rüyanızın anlamını keşfedin";  // NEW
 "enter_dream" = "Rüyanızı yazın";  // NEW

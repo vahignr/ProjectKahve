@@ -31,7 +31,8 @@ struct FortuneCategory: Identifiable {
 
 // MARK: - Category Selection View
 struct CategorySelectionView: View {
-    @StateObject private var localizationManager = LocalizationManager.shared
+    @EnvironmentObject var localizationManager: LocalizationManager
+    
     @State private var showKahveFali = false
     @State private var showDreamInterpreter = false
     @State private var isLoading = true
@@ -45,14 +46,12 @@ struct CategorySelectionView: View {
     
     var body: some View {
         ZStack {
-            // Animated Background
             BackgroundView(animate: true)
 
             // Main Content
             VStack(spacing: 32) {
-                // Header
-                HeaderView()
-                
+                HeaderView() // <--- We embed the header
+
                 // Categories Grid
                 ScrollView(showsIndicators: false) {
                     LazyVGrid(
@@ -163,7 +162,10 @@ struct BackgroundView: View {
     }
 }
 
+// MARK: - HeaderView with environment object
 struct HeaderView: View {
+    @EnvironmentObject var localizationManager: LocalizationManager
+    
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: "sparkles")
@@ -171,6 +173,7 @@ struct HeaderView: View {
                 .foregroundColor(ModernTheme.sage)
                 .symbolEffect(.bounce, value: true)
             
+            // This now updates based on current language
             Text("fortune_types".localized)
                 .font(ModernTheme.Typography.largeTitle)
                 .foregroundColor(ModernTheme.textPrimary)

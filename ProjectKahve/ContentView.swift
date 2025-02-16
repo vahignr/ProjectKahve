@@ -1,7 +1,3 @@
-//
-//  ContentView.swift
-//
-
 import SwiftUI
 import AVFoundation
 import UIKit

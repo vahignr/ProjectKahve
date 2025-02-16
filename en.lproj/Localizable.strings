@@ -2,13 +2,13 @@
 
 // CategorySelectionView
 "fortune_types" = "Fortune Types";
-"coffee_fortune" = "Coffee Fortune";
-"coffee_fortune_desc" = "Discover your future from Turkish coffee cup";
+"coffee_fortune" = "Coffee Fortune Telling";
+"coffee_fortune_desc" = "Fortune telling from Turkish coffee cup";
 "tarot" = "Tarot";
 "palm_reading" = "Palm Reading";
 "dice_fortune" = "Dice Fortune";
 "coming_soon" = "Coming Soon";
-"coffee_fortune_reading" = "Coffee Fortune Reading";
+"coffee_fortune_reading" = "Coffee Fortune Telling";
 "language_english" = "English";
 "language_turkish" = "Turkish";
 "coffee_cup" = "Coffee Cup Image";
@@ -18,18 +18,18 @@
 "both_images_required" = "Both cup and plate images are required";
 "select_cup" = "Select Cup Photo";
 "select_plate" = "Select Plate Photo";
-"discover_your_future" = "Discover your mystical future with traditional fortune telling methods";
+"discover_your_future" = "Discover your future with fortune telling";
 "choose_preferred_language" = "Choose your preferred language";
 
 // ContentView
 "back" = "Back";
 "select_language" = "Select Language";
-"processing_fortune" = "Processing your fortune...";
+"processing_fortune" = "Reading your fortune...";
 "select_cup_photo" = "Select cup photo";
 "select_photo" = "Select Photo";
 "read_fortune" = "Read Fortune";
 "stop" = "Stop";
-"listen_fortune" = "Listen to Fortune";
+"listen_fortune" = "Listen to the Fortune Teller";
 
 "credits_remaining" = "Credits Remaining: %d";
 "buy_credits" = "Buy Credits";
@@ -40,16 +40,16 @@
 "credit_pack_3" = "3 Credits Pack";
 
 "your_credits" = "Your Credits";
-"credits_remaining_desc" = "These credits can be used for fortune readings";
+"credits_remaining_desc" = "These credits can be used for fortune telling";
 "loading_products" = "Loading Products...";
 "select_language" = "Select Language";
 
-"stay_in_app_while_processing" = "Please stay in the app while your fortune is being processed so you don’t lose your credit.";
-"irrelevant_image_warning" = "If you pick irrelevant picture, AI will generate a virtual coffee cup for you and read that.";
+"stay_in_app_while_processing" = "Please stay in the app while your fortune is being processed so you don’t lose the credit.";
+"irrelevant_image_warning" = "If you submit an irrelevant picture, AI will generate a virtual coffee cup for you and read that.";
 
 // English
-"cup_validation_failed" = "This doesn't appear to be a coffee cup image. Please upload a clear photo of a Turkish coffee cup.";
-"plate_validation_failed" = "This doesn't appear to be a coffee plate image. Please upload a clear photo of a Turkish coffee plate.";
+"cup_validation_failed" = "This doesn't appear to be a coffee cup image. Please upload a clear photo of a Turkish coffee cup. (Empty cup after drinking)";
+"plate_validation_failed" = "This doesn't appear to be a coffee plate image. Please upload a clear photo of a Turkish coffee plate (After flipping the cup on it for a minute).";
 
 
 
@@ -59,17 +59,17 @@
 
 // CategorySelectionView
 "fortune_types" = "Fortune Types";
-"coffee_fortune" = "Coffee Fortune";
-"coffee_fortune_desc" = "Discover your future from Turkish coffee cup";
+"coffee_fortune" = "Coffee Fortune Telling";
+"coffee_fortune_desc" = "Fortune telling from Turkish coffee cup";
 "dream_interpreter" = "Dream Interpreter";  // NEW
 "dream_interpreter_desc" = "Discover the meaning of your dream";  // NEW
-"enter_dream" = "Enter Your Dream";  // NEW
+"enter_dream" = "Describe Your Dream";  // NEW
 "interpret_dream" = "Interpret Dream";  // NEW
 "dream_placeholder" = "Please describe your dream in detail...";  // NEW
 "processing_dream" = "Interpreting your dream...";  // NEW
 
-"dream_text_too_short" = "Please enter at least %d characters";
-"dream_text_too_long" = "Please enter no more than %d characters";
+"dream_text_too_short" = "Please type at least %d characters";
+"dream_text_too_long" = "Please type no more than %d characters";
 "dream_api_error" = "Failed to generate interpretation. Please try again.";
 "notice" = "Notice";
 "ok" = "OK";

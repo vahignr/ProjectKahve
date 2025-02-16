@@ -208,7 +208,7 @@ struct APIService {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             
             let jsonPayload: [String: Any] = [
-                "model": "gpt-4-1106-preview",
+                "model": "gpt-4o-mini",
                 "messages": messages,
                 "max_tokens": 750,
                 "temperature": 0.7
@@ -307,7 +307,7 @@ struct APIService {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             
             let jsonPayload: [String: Any] = [
-                "model": "gpt-4-vision-preview",
+                "model": "gpt-4o-mini",
                 "messages": messages,
                 "max_tokens": 750,
                 "temperature": 0.5

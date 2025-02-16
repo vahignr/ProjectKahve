@@ -3,6 +3,8 @@ import AVFoundation
 
 struct DreamInterpreterView: View {
     @Environment(\.dismiss) private var dismiss
+    
+    @EnvironmentObject var localizationManager: LocalizationManager
     @EnvironmentObject var creditsManager: CreditsManager
     @StateObject private var audioManager = AudioPlayerManager()
     
@@ -30,17 +32,19 @@ struct DreamInterpreterView: View {
     // Fade-in
     @State private var appearOpacity = 0.0
     
+    // For swipe-to-go-back gesture
+    @GestureState private var dragOffset = CGSize.zero
+    
     var body: some View {
         ZStack {
             BackgroundView(animate: true)
             
-            // Main content
             VStack(spacing: 25) {
                 headerBar()
                 
                 if !showInterpretation {
                     dreamInputSection()
-                    characterCountView() // Shows "13/5000"
+                    characterCountView()
                 }
                 
                 if isProcessing {
@@ -68,7 +72,7 @@ struct DreamInterpreterView: View {
                     }
                 }
                 
-                // Interpret Dream button if not processing or showing result
+                // Only show interpret button if we're not processing or showing final result
                 if !showInterpretation && !isProcessing {
                     interpretButton()
                         .padding(.horizontal)
@@ -77,7 +81,6 @@ struct DreamInterpreterView: View {
                 Spacer(minLength: 50)
             }
             .padding()
-            // Dismiss keyboard even if tapping the text box
             .contentShape(Rectangle())
             .onTapGesture {
                 hideKeyboard()
@@ -94,12 +97,27 @@ struct DreamInterpreterView: View {
                 }
             }
         }
+        // Swipe-to-go-back gesture
+        .gesture(
+            DragGesture()
+                .updating($dragOffset) { value, state, _ in
+                    state = value.translation
+                }
+                .onEnded { value in
+                    if value.translation.width > 100 {
+                        dismiss()
+                    }
+                }
+        )
+        // Stop audio if user leaves Dream Interpreter
+        .onDisappear {
+            audioManager.stop()
+        }
         .alert("notice".localized, isPresented: $showAlert) {
             Button("ok".localized, role: .cancel) {}
         } message: {
             Text(alertMessage)
         }
-        // Additional sheets
         .sheet(isPresented: $showLanguageSelection) {
             LanguageSelectionView()
         }
@@ -109,7 +127,6 @@ struct DreamInterpreterView: View {
         .sheet(isPresented: $showCreditsDetail) {
             CreditsDetailView().environmentObject(creditsManager)
         }
-        // Fade in
         .opacity(appearOpacity)
         .onAppear {
             withAnimation(.easeIn(duration: 0.3)) {
@@ -172,7 +189,6 @@ extension DreamInterpreterView {
                     .foregroundColor(ModernTheme.sage)
                     .symbolEffect(.bounce, value: true)
                 
-                // Replaced "dream_interpretation" with "dream_interpreter"
                 Text("dream_interpreter".localized)
                     .font(ModernTheme.Typography.title)
                     .foregroundColor(ModernTheme.textPrimary)
@@ -205,11 +221,8 @@ extension DreamInterpreterView {
         }
     }
     
-    // Character count / 5000
     private func characterCountView() -> some View {
         HStack {
-            // Example: "13/5,000"
-            // If it's outside range (under 20 or over 5000) => show red
             let count = dreamText.count
             Text("\(count)/\(maxCharacters)")
                 .font(ModernTheme.Typography.caption)
@@ -243,10 +256,16 @@ extension DreamInterpreterView {
                 .tint(ModernTheme.sage)
                 .scaleEffect(1.5)
                 .padding()
+            
+            Text("stay_in_app_while_processing".localized)
+                .font(ModernTheme.Typography.body)
+                .foregroundColor(ModernTheme.textSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
     
-    // Final text with highlight
     private func interpretationSection() -> some View {
         VStack(spacing: 20) {
             FortuneTextDisplay(
@@ -257,7 +276,8 @@ extension DreamInterpreterView {
                 ),
                 duration: audioManager.duration
             )
-            .frame(height: 300)
+            // Use minHeight so text can grow
+            .frame(minHeight: 300)
             .background(ModernTheme.surface)
             .cornerRadius(20)
             .padding(.horizontal)
@@ -266,6 +286,9 @@ extension DreamInterpreterView {
     
     private func newDreamButton() -> some View {
         Button(action: {
+            // Stop audio if user starts new dream
+            audioManager.stop()
+            
             withAnimation {
                 dreamText = ""
                 interpretationText = ""
@@ -292,9 +315,10 @@ extension DreamInterpreterView {
 // MARK: - Dream Interpretation Logic
 extension DreamInterpreterView {
     private func interpretDream() {
+        hideKeyboard()
+        
         let trimmed = dreamText.trimmingCharacters(in: .whitespacesAndNewlines)
         
-        // Enforce min/max length
         if trimmed.count < minCharacters {
             alertMessage = String(format: "dream_text_too_short".localized, minCharacters)
             showAlert = true
@@ -306,7 +330,6 @@ extension DreamInterpreterView {
             return
         }
         
-        // Use credit
         guard creditsManager.useCredit() else {
             showPurchaseView = true
             return
@@ -315,12 +338,10 @@ extension DreamInterpreterView {
         isProcessing = true
         showInterpretation = false
         
-        // 1) Call dream interpretation API
         APIService.sendDreamToAPI(dreamText: trimmed) { content in
             DispatchQueue.main.async {
                 self.isProcessing = false
                 if let content = content {
-                    // Store final text, then do TTS
                     self.interpretationText = content
                     self.generateTTS(for: content)
                 } else {
@@ -330,7 +351,6 @@ extension DreamInterpreterView {
         }
     }
     
-    // 2) Generate TTS
     private func generateTTS(for text: String) {
         isProcessing = true
         
@@ -345,7 +365,6 @@ extension DreamInterpreterView {
         }
     }
     
-    // 3) Load TTS but do not autoplay
     private func loadAndPlayAudio(from url: URL) {
         audioManager.stop()
         audioManager.loadAudio(from: url, autoplay: false)
@@ -359,17 +378,13 @@ extension DreamInterpreterView {
         }
     }
     
-    // Hide keyboard even if user taps the text box
     private func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
                                         to: nil, from: nil, for: nil)
     }
 }
 
-// -------------------------------------------------------
-// If you do NOT already have an ActionButton, keep this.
-// Otherwise, remove it if your project has it elsewhere.
-// -------------------------------------------------------
+// If you already have an ActionButton, remove or unify this.
 fileprivate struct ActionButton: View {
     let title: String
     let icon: String

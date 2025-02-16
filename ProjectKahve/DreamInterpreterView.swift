@@ -1,104 +1,89 @@
 import SwiftUI
 import AVFoundation
 
-// MARK: - Constants
-private let lastDreamTextKey = "lastDreamText"
-private let lastDreamInterpretationKey = "lastDreamInterpretation"
-private let minCharacters = 20
-private let maxCharacters = 5000
-
 struct DreamInterpreterView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var localizationManager = LocalizationManager.shared
     @EnvironmentObject var creditsManager: CreditsManager
     @StateObject private var audioManager = AudioPlayerManager()
-    @GestureState private var dragOffset = CGSize.zero
-    @FocusState private var isTextFieldFocused: Bool
     
+    // Dream text user types
     @State private var dreamText: String = ""
-    @State private var isProcessing = false
-    @State private var showLanguageSelection = false
-    @State private var showPurchaseView = false
-    @State private var showCreditsDetail = false
-    @State private var appearOpacity = 0.0
+    
+    // Final interpreted text from API
     @State private var interpretationText: String = ""
-    @State private var showInterpretation: Bool = false
+    
+    // Processing states
+    @State private var isProcessing = false
+    @State private var showInterpretation = false
+    
+    // Sheets
+    @State private var showPurchaseView = false
+    @State private var showLanguageSelection = false
+    @State private var showCreditsDetail = false
+    
+    // Min/max length & alert
+    private let minCharacters = 20
+    private let maxCharacters = 5000
     @State private var showAlert = false
     @State private var alertMessage = ""
-    @State private var showInputForm = false
     
-    // Character count computed property
-    private var characterCount: Int {
-        dreamText.count
-    }
-    
-    private var isValidDreamLength: Bool {
-        characterCount >= minCharacters && characterCount <= maxCharacters
-    }
-    
-    private var remainingCharacters: Int {
-        maxCharacters - characterCount
-    }
+    // Fade-in
+    @State private var appearOpacity = 0.0
     
     var body: some View {
         ZStack {
             BackgroundView(animate: true)
             
+            // Main content
             VStack(spacing: 25) {
-                HeaderBar()
+                headerBar()
+                
                 if !showInterpretation {
-                    DreamInputSection()
-                    CharacterCountView()
+                    dreamInputSection()
+                    characterCountView() // Shows "13/5000"
                 }
                 
                 if isProcessing {
-                    ProcessingView()
+                    processingView()
                 } else if showInterpretation {
-                    VStack(spacing: 20) {
-                        InterpretationSection()
-                        
-                        if audioManager.duration > 0 {
-                            VStack(spacing: 12) {
-                                CustomAudioProgress(audioManager: audioManager)
-                                    .frame(height: 40)
-                                
-                                ActionButton(
-                                    title: audioManager.isPlaying ? "stop".localized : "listen_fortune".localized,
-                                    icon: audioManager.isPlaying ? "stop.circle" : "play.circle",
-                                    action: toggleAudio,
-                                    style: .secondary
-                                )
-                            }
-                            .padding(.horizontal)
+                    interpretationSection()
+                    
+                    // If we have audio, show progress & listen button
+                    if audioManager.duration > 0 {
+                        VStack(spacing: 12) {
+                            CustomAudioProgress(audioManager: audioManager)
+                                .frame(height: 40)
+                            
+                            ActionButton(
+                                title: audioManager.isPlaying ? "stop".localized : "listen_fortune".localized,
+                                icon: audioManager.isPlaying ? "stop.circle" : "play.circle",
+                                action: toggleAudio,
+                                style: .secondary
+                            )
                         }
+                        .padding(.horizontal)
                         
-                        if !isProcessing {
-                            NewDreamButton()
-                                .padding(.top, 10)
-                        }
+                        newDreamButton()
+                            .padding(.top, 10)
                     }
                 }
                 
+                // Interpret Dream button if not processing or showing result
                 if !showInterpretation && !isProcessing {
-                    ActionButton(
-                        title: "interpret_dream".localized,
-                        icon: "sparkles",
-                        action: interpretDream
-                    )
-                    .padding(.horizontal)
+                    interpretButton()
+                        .padding(.horizontal)
                 }
                 
                 Spacer(minLength: 50)
             }
             .padding()
-            .simultaneousGesture(
-                TapGesture()
-                    .onEnded { _ in
-                        isTextFieldFocused = false
-                    }
-            )
+            // Dismiss keyboard even if tapping the text box
+            .contentShape(Rectangle())
+            .onTapGesture {
+                hideKeyboard()
+            }
             
-            // Language selector positioned absolutely at the bottom
+            // Language button at bottom-right
             VStack {
                 Spacer()
                 HStack {
@@ -108,184 +93,162 @@ struct DreamInterpreterView: View {
                         .padding(.bottom, 16)
                 }
             }
-            .ignoresSafeArea(.keyboard)
         }
         .alert("notice".localized, isPresented: $showAlert) {
-            Button("ok".localized, role: .cancel) { }
+            Button("ok".localized, role: .cancel) {}
         } message: {
             Text(alertMessage)
         }
+        // Additional sheets
         .sheet(isPresented: $showLanguageSelection) {
             LanguageSelectionView()
         }
         .sheet(isPresented: $showPurchaseView) {
-            PurchaseView()
+            PurchaseView().environmentObject(creditsManager)
         }
         .sheet(isPresented: $showCreditsDetail) {
-            CreditsDetailView()
+            CreditsDetailView().environmentObject(creditsManager)
         }
+        // Fade in
         .opacity(appearOpacity)
         .onAppear {
             withAnimation(.easeIn(duration: 0.3)) {
                 appearOpacity = 1.0
             }
-            loadLastInterpretation()
         }
-        .onChange(of: isProcessing) { newValue in
-            UIApplication.shared.keepScreenOn(newValue)
-        }
-        .onChange(of: audioManager.isPlaying) { newValue in
-            UIApplication.shared.keepScreenOn(newValue)
-        }
-        .gesture(
-            DragGesture()
-                .updating($dragOffset) { value, state, _ in
-                    state = value.translation
-                }
-                .onEnded { value in
-                    if value.translation.width > 100 {
-                        dismiss()
-                    }
-                }
-        )
+        // Keep screen on during processing or audio
+        .onChange(of: isProcessing) { UIApplication.shared.keepScreenOn($0) }
+        .onChange(of: audioManager.isPlaying) { UIApplication.shared.keepScreenOn($0) }
     }
-    // MARK: - Character Count View
-        private func CharacterCountView() -> some View {
-            HStack {
-                Text("\(characterCount)/\(maxCharacters)")
-                    .font(ModernTheme.Typography.caption)
-                    .foregroundColor(isValidDreamLength ? ModernTheme.textSecondary : .red)
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-        }
-        
-        // MARK: - Load Last Interpretation
-        private func loadLastInterpretation() {
-            if let savedInterpretation = UserDefaults.standard.string(forKey: lastDreamInterpretationKey),
-               let savedDream = UserDefaults.standard.string(forKey: lastDreamTextKey) {
-                interpretationText = savedInterpretation
-                dreamText = savedDream
-                showInterpretation = true
-                showInputForm = false
-            } else {
-                showInputForm = true
-            }
-        }
-        
-        // MARK: - New Dream Button
-        private func NewDreamButton() -> some View {
+}
+
+// MARK: - Subviews
+extension DreamInterpreterView {
+    
+    private func headerBar() -> some View {
+        HStack {
             Button(action: {
-                withAnimation {
-                    dreamText = ""
-                    showInterpretation = false
+                withAnimation(.easeIn(duration: 0.2)) {
+                    dismiss()
                 }
             }) {
-                HStack(spacing: 12) {
-                    Image(systemName: "plus.circle")
-                        .font(.system(size: 20))
-                    Text("new_dream_interpretation".localized)
+                HStack(spacing: 8) {
+                    Image(systemName: "chevron.left")
+                    Text("back".localized)
+                }
+                .font(ModernTheme.Typography.body)
+                .foregroundColor(ModernTheme.sage)
+            }
+            
+            Spacer()
+            
+            Button(action: {
+                showCreditsDetail = true
+            }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 14, weight: .medium))
+                    Text(String(format: "credits_remaining".localized, creditsManager.remainingCredits))
                         .font(ModernTheme.Typography.body)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(ModernTheme.primaryGradient)
-                .foregroundColor(.white)
-                .cornerRadius(16)
-                .shadow(color: ModernTheme.sage.opacity(0.3), radius: 10, x: 0, y: 4)
+                .foregroundColor(ModernTheme.sage)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(
+                    Capsule()
+                        .fill(ModernTheme.sage.opacity(0.1))
+                )
             }
-            .padding(.horizontal, 20)
         }
-        
-        // MARK: - Header Bar
-        private func HeaderBar() -> some View {
-            HStack {
-                Button(action: {
-                    withAnimation(.easeIn(duration: 0.2)) {
-                        dismiss()
-                    }
-                }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "chevron.left")
-                        Text("back".localized)
-                    }
-                    .font(ModernTheme.Typography.body)
-                    .foregroundColor(ModernTheme.sage)
-                }
-                
-                Spacer()
-                
-                Button(action: {
-                    showCreditsDetail = true
-                }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "sparkles")
-                            .font(.system(size: 14, weight: .medium))
-                        Text(String(format: "credits_remaining".localized, creditsManager.remainingCredits))
-                            .font(ModernTheme.Typography.body)
-                    }
-                    .foregroundColor(ModernTheme.sage)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(
-                        Capsule()
-                            .fill(ModernTheme.sage.opacity(0.1))
-                    )
-                }
-            }
-            .padding(.horizontal)
-            .padding(.top, 8)
-        }
-        
-        // MARK: - Dream Input Section
-        private func DreamInputSection() -> some View {
+        .padding(.horizontal)
+        .padding(.top, 8)
+    }
+    
+    private func dreamInputSection() -> some View {
+        VStack(spacing: 16) {
             VStack(spacing: 16) {
-                VStack(spacing: 16) {
-                    Image(systemName: "moon.stars.fill")
-                        .font(.system(size: 44))
-                        .foregroundColor(ModernTheme.sage)
-                        .symbolEffect(.bounce, value: true)
-                    
-                    Text("dream_interpreter".localized)
-                        .font(ModernTheme.Typography.title)
+                Image(systemName: "moon.stars.fill")
+                    .font(.system(size: 44))
+                    .foregroundColor(ModernTheme.sage)
+                    .symbolEffect(.bounce, value: true)
+                
+                // Replaced "dream_interpretation" with "dream_interpreter"
+                Text("dream_interpreter".localized)
+                    .font(ModernTheme.Typography.title)
+                    .foregroundColor(ModernTheme.textPrimary)
+                    .multilineTextAlignment(.center)
+                
+                ZStack(alignment: .topLeading) {
+                    TextEditor(text: $dreamText)
+                        .font(ModernTheme.Typography.body)
                         .foregroundColor(ModernTheme.textPrimary)
-                        .multilineTextAlignment(.center)
+                        .frame(height: 200)
+                        .scrollContentBackground(.hidden)
+                        .background(ModernTheme.surface)
                     
-                    ZStack(alignment: .topLeading) {
-                        TextEditor(text: $dreamText)
+                    if dreamText.isEmpty {
+                        Text("dream_placeholder".localized)
                             .font(ModernTheme.Typography.body)
-                            .foregroundColor(ModernTheme.textPrimary)
-                            .frame(height: 200)
-                            .scrollContentBackground(.hidden)
-                            .background(ModernTheme.surface)
-                            .focused($isTextFieldFocused)
-                            .onChange(of: dreamText) { newValue in
-                                if newValue.count > maxCharacters {
-                                    dreamText = String(newValue.prefix(maxCharacters))
-                                }
-                            }
-                        
-                        if dreamText.isEmpty {
-                            Text("dream_placeholder".localized)
-                                .font(ModernTheme.Typography.body)
-                                .foregroundColor(ModernTheme.textSecondary)
-                                .padding(.top, 8)
-                                .padding(.leading, 5)
-                        }
+                            .foregroundColor(ModernTheme.textSecondary)
+                            .padding(.top, 8)
+                            .padding(.leading, 5)
                     }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(ModernTheme.surface)
-                            .shadow(color: Color.black.opacity(0.05), radius: 10)
-                    )
                 }
-                .padding(.top, 20)
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(ModernTheme.surface)
+                        .shadow(color: .black.opacity(0.05), radius: 10)
+                )
             }
+            .padding(.top, 20)
         }
-        
-        // MARK: - Interpretation Section
-        private func InterpretationSection() -> some View {
+    }
+    
+    // Character count / 5000
+    private func characterCountView() -> some View {
+        HStack {
+            // Example: "13/5,000"
+            // If it's outside range (under 20 or over 5000) => show red
+            let count = dreamText.count
+            Text("\(count)/\(maxCharacters)")
+                .font(ModernTheme.Typography.caption)
+                .foregroundColor(
+                    (count < minCharacters || count > maxCharacters)
+                    ? Color.red
+                    : ModernTheme.textSecondary
+                )
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+    }
+    
+    private func interpretButton() -> some View {
+        ActionButton(
+            title: "interpret_dream".localized,
+            icon: "sparkles",
+            action: interpretDream
+        )
+    }
+    
+    private func processingView() -> some View {
+        VStack(spacing: 12) {
+            Text("processing_dream".localized)
+                .font(ModernTheme.Typography.headline)
+                .foregroundColor(ModernTheme.textPrimary)
+                .multilineTextAlignment(.center)
+                .padding()
+            
+            ProgressView()
+                .tint(ModernTheme.sage)
+                .scaleEffect(1.5)
+                .padding()
+        }
+    }
+    
+    // Final text with highlight
+    private func interpretationSection() -> some View {
+        VStack(spacing: 20) {
             FortuneTextDisplay(
                 text: interpretationText,
                 currentTime: .init(
@@ -299,37 +262,128 @@ struct DreamInterpreterView: View {
             .cornerRadius(20)
             .padding(.horizontal)
         }
-        
-        // MARK: - Processing View
-        private func ProcessingView() -> some View {
-            VStack(spacing: 12) {
-                Text("processing_dream".localized)
-                    .font(ModernTheme.Typography.headline)
-                    .foregroundColor(ModernTheme.textPrimary)
-                    .multilineTextAlignment(.center)
-                    .padding()
-                
-                ProgressView()
-                    .tint(ModernTheme.sage)
-                    .scaleEffect(1.5)
-                    .padding()
-                
-                Text("stay_in_app_while_processing".localized)
-                    .font(ModernTheme.Typography.body)
-                    .foregroundColor(ModernTheme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 20)
-                    .fixedSize(horizontal: false, vertical: true)
+    }
+    
+    private func newDreamButton() -> some View {
+        Button(action: {
+            withAnimation {
+                dreamText = ""
+                interpretationText = ""
+                showInterpretation = false
             }
+        }) {
+            HStack(spacing: 12) {
+                Image(systemName: "plus.circle")
+                    .font(.system(size: 20))
+                Text("new_dream_interpretation".localized)
+                    .font(ModernTheme.Typography.body)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(ModernTheme.primaryGradient)
+            .foregroundColor(.white)
+            .cornerRadius(16)
+            .shadow(color: ModernTheme.sage.opacity(0.3), radius: 10, x: 0, y: 4)
+        }
+        .padding(.horizontal, 20)
+    }
+}
+
+// MARK: - Dream Interpretation Logic
+extension DreamInterpreterView {
+    private func interpretDream() {
+        let trimmed = dreamText.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Enforce min/max length
+        if trimmed.count < minCharacters {
+            alertMessage = String(format: "dream_text_too_short".localized, minCharacters)
+            showAlert = true
+            return
+        }
+        if trimmed.count > maxCharacters {
+            alertMessage = String(format: "dream_text_too_long".localized, maxCharacters)
+            showAlert = true
+            return
         }
         
-        // MARK: - Action Button
-        private func ActionButton(
-            title: String,
-            icon: String,
-            action: @escaping () -> Void,
-            style: ButtonStyle = .primary
-        ) -> some View {
+        // Use credit
+        guard creditsManager.useCredit() else {
+            showPurchaseView = true
+            return
+        }
+        
+        isProcessing = true
+        showInterpretation = false
+        
+        // 1) Call dream interpretation API
+        APIService.sendDreamToAPI(dreamText: trimmed) { content in
+            DispatchQueue.main.async {
+                self.isProcessing = false
+                if let content = content {
+                    // Store final text, then do TTS
+                    self.interpretationText = content
+                    self.generateTTS(for: content)
+                } else {
+                    print("Dream interpretation request failed (nil).")
+                }
+            }
+        }
+    }
+    
+    // 2) Generate TTS
+    private func generateTTS(for text: String) {
+        isProcessing = true
+        
+        APIService.textToSpeech(caption: text) { fileUrl in
+            DispatchQueue.main.async {
+                self.isProcessing = false
+                self.showInterpretation = true
+                if let fileUrl = fileUrl {
+                    self.loadAndPlayAudio(from: fileUrl)
+                }
+            }
+        }
+    }
+    
+    // 3) Load TTS but do not autoplay
+    private func loadAndPlayAudio(from url: URL) {
+        audioManager.stop()
+        audioManager.loadAudio(from: url, autoplay: false)
+    }
+    
+    private func toggleAudio() {
+        if audioManager.isPlaying {
+            audioManager.pause()
+        } else {
+            audioManager.play()
+        }
+    }
+    
+    // Hide keyboard even if user taps the text box
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
+                                        to: nil, from: nil, for: nil)
+    }
+}
+
+// -------------------------------------------------------
+// If you do NOT already have an ActionButton, keep this.
+// Otherwise, remove it if your project has it elsewhere.
+// -------------------------------------------------------
+fileprivate struct ActionButton: View {
+    let title: String
+    let icon: String
+    let action: () -> Void
+    var style: ButtonStyleType = .primary
+    
+    enum ButtonStyleType {
+        case primary
+        case secondary
+    }
+    
+    var body: some View {
+        switch style {
+        case .primary:
             Button(action: action) {
                 HStack(spacing: 12) {
                     Image(systemName: icon)
@@ -339,20 +393,33 @@ struct DreamInterpreterView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(
-                    Group {
-                        if style == .primary {
-                            ModernTheme.primaryGradient
-                        } else {
-                            ModernTheme.surface
-                        }
-                    }
-                )
-                .foregroundColor(style == .primary ? .white : ModernTheme.textPrimary)
+                .background(ModernTheme.primaryGradient)
+                .foregroundColor(.white)
                 .cornerRadius(16)
                 .shadow(
-                    color: style == .primary ?
-                        ModernTheme.sage.opacity(0.3) : Color.black.opacity(0.05),
+                    color: ModernTheme.sage.opacity(0.3),
+                    radius: 10,
+                    x: 0,
+                    y: 4
+                )
+            }
+            .buttonStyle(ScaleButtonStyle())
+            
+        case .secondary:
+            Button(action: action) {
+                HStack(spacing: 12) {
+                    Image(systemName: icon)
+                        .font(.system(size: 20))
+                    Text(title)
+                        .font(ModernTheme.Typography.body)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(ModernTheme.surface)
+                .foregroundColor(ModernTheme.textPrimary)
+                .cornerRadius(16)
+                .shadow(
+                    color: Color.black.opacity(0.05),
                     radius: 10,
                     x: 0,
                     y: 4
@@ -360,88 +427,5 @@ struct DreamInterpreterView: View {
             }
             .buttonStyle(ScaleButtonStyle())
         }
-        
-        // MARK: - Helper Methods
-        private func interpretDream() {
-            if !isValidDreamLength {
-                if characterCount < minCharacters {
-                    alertMessage = String(format: "dream_text_too_short".localized, minCharacters)
-                } else {
-                    alertMessage = String(format: "dream_text_too_long".localized, maxCharacters)
-                }
-                showAlert = true
-                return
-            }
-            
-            guard creditsManager.useCredit() else {
-                showPurchaseView = true
-                return
-            }
-            
-            isTextFieldFocused = false
-            
-            withAnimation {
-                isProcessing = true
-                showInterpretation = false
-            }
-            
-            APIService.sendDreamToAPI(dreamText: dreamText) { content in
-                DispatchQueue.main.async {
-                    if let content = content {
-                        self.interpretationText = content
-                        
-                        // Save the dream and interpretation
-                        UserDefaults.standard.set(self.dreamText, forKey: lastDreamTextKey)
-                        UserDefaults.standard.set(content, forKey: lastDreamInterpretationKey)
-                        
-                        // Generate TTS for the interpretation
-                        APIService.textToSpeech(caption: content) { fileUrl in
-                            DispatchQueue.main.async {
-                                self.isProcessing = false
-                                self.showInterpretation = true
-                                if let fileUrl = fileUrl {
-                                    self.loadAndPlayAudio(from: fileUrl)
-                                }
-                            }
-                        }
-                    } else {
-                        withAnimation {
-                            self.isProcessing = false
-                        }
-                        alertMessage = "dream_api_error".localized
-                        showAlert = true
-                    }
-                }
-            }
-        }
-        
-        private func toggleAudio() {
-            if audioManager.isPlaying {
-                audioManager.pause()
-            } else {
-                audioManager.play()
-            }
-        }
-        
-        private func loadAndPlayAudio(from url: URL) {
-            DispatchQueue.main.async {
-                audioManager.stop()
-                audioManager.loadAudio(from: url, autoplay: false)
-            }
-        }
     }
-
-    // MARK: - Button Style Enum
-    extension DreamInterpreterView {
-        enum ButtonStyle {
-            case primary
-            case secondary
-        }
-    }
-
-    struct DreamInterpreterView_Previews: PreviewProvider {
-        static var previews: some View {
-            DreamInterpreterView()
-                .environmentObject(CreditsManager.shared)
-        }
-    }
+}

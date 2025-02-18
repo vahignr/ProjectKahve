@@ -1,3 +1,8 @@
+//
+//  ContentView.swift
+//  ProjectKahve
+//
+
 import SwiftUI
 import AVFoundation
 import UIKit
@@ -199,6 +204,7 @@ struct ContentView: View {
                 }
             }
             .frame(height: 300)
+            .padding(.top, 20) // <-- Added extra padding to avoid overlap
             .animation(.spring(response: 0.4, dampingFraction: 0.8), value: isProcessing)
             .animation(.spring(response: 0.4, dampingFraction: 0.8), value: showFortuneText)
         }

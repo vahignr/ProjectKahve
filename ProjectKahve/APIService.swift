@@ -28,6 +28,8 @@ struct APIService {
     - Structured as a flowing narrative
     - Balanced between practical insight and mystical wisdom
     
+    - Try to keep text output around 600 tokens
+    
     The dream to interpret is:
     """
     
@@ -48,6 +50,8 @@ struct APIService {
     - Teknik terimlerden arınmış
     - Akıcı bir anlatı şeklinde
     - Pratik içgörü ve mistik bilgelik arasında dengeli
+    
+    -Text çıktısını 600 token civarında tut
     
     Yorumlanacak rüya:
     """
